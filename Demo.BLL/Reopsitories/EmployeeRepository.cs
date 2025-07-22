@@ -13,7 +13,7 @@ namespace Demo.BLL.Reopsitories
     {
         public EmployeeRepository(AppDbContext dbContext) : base(dbContext)
         {
-
+            Console.WriteLine("Hello from Ajith"); 
         }
         public IQueryable<Employee> GetEmpByAddress(string address)
         {
