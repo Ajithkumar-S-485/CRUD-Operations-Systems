@@ -14,7 +14,7 @@ namespace Demo.BLL.Reopsitories
     {
         public DepartmentRepository(AppDbContext dbContext) : base(dbContext)
         {
-
+            Console.WriteLine("Hello");
         }
 
     }
