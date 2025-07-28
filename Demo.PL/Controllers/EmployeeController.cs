@@ -1,153 +1,148 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Demo.BLL.Interfaces;
 using Demo.DAL.Models;
 using Demo.PL.Helpers;
 using Demo.PL.ViewModels;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Demo.PL.Controllers
 {
-    public class EmployeeController : Controller
+    [ApiController]
+    [Route("api/[controller]")]
+    public class EmployeeController : ControllerBase
     {
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _unitOfWork;
-        //private readonly IEmployeeRepository _employeeRepo;
 
-
-        public EmployeeController(IUnitOfWork unitOfWork,IMapper mapper)
+        public EmployeeController(IUnitOfWork unitOfWork, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
-            //_employeeRepo = employeeRepo;
         }
 
-        
-        public IActionResult Index(string searchInp)
+        // GET: api/employee
+        [HttpGet]
+        public ActionResult<IEnumerable<EmployeeDto>> GetEmployees([FromQuery] string searchInp = null)
         {
-            var emplpyee = Enumerable.Empty<Employee>();
+            var employees = Enumerable.Empty<Employee>();
 
             if (string.IsNullOrEmpty(searchInp))
-                emplpyee = _unitOfWork.EmployeeRepository.GetAll();
+                employees = _unitOfWork.EmployeeRepository.GetAll();
             else
-                emplpyee = _unitOfWork.EmployeeRepository.SearchByName(searchInp.ToLower());
+                employees = _unitOfWork.EmployeeRepository.SearchByName(searchInp.ToLower());
 
-            var mappedEmp = _mapper.Map<IEnumerable<Employee>, IEnumerable<EmployeeViewModel>>(emplpyee);
-            return View(mappedEmp);
-            
+            var employeeDtos = _mapper.Map<IEnumerable<Employee>, IEnumerable<EmployeeDto>>(employees);
+            return Ok(employeeDtos);
         }
 
-
-        public IActionResult Create()
+        // GET: api/employee/5
+        [HttpGet("{id}")]
+        public ActionResult<EmployeeDto> GetEmployee(int id)
         {
-
-            //ViewData["Departments"] = _deptRepo.GetAll();
-            return View();
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult Create(EmployeeViewModel employeeVM)
-        {
-            if (ModelState.IsValid)
+            var employee = _unitOfWork.EmployeeRepository.Get(id);
+            if (employee == null)
             {
-                ///// var mappedEmp = _mapper.Map<EmployeeViewModel, Employee>(employeeVM);
-                ///var count = _unitOfWork.EmployeeRepository.Add(mappedEmp);
-                ///if (count > 0)
-                ///{
-                ///    return RedirectToAction(nameof(Index));
-                ///} 
-
-                var imageName = DocumentSettings.UploadFile(employeeVM.Image, "images");
-                employeeVM.ImageName = imageName;
-
-                var employee = _mapper.Map<EmployeeViewModel, Employee>(employeeVM);
-
-                _unitOfWork.EmployeeRepository.Add(employee);
-                
-                _unitOfWork.Complete();
-
-                return RedirectToAction(nameof(Index));
-                
-            }
-            return View(employeeVM);
-        }
-
-        //[HttpGet]
-        public IActionResult Details(int? id, string ViewName = "Details") //Detailes 
-        {
-            if (!id.HasValue)
-                return BadRequest();
-
-            var employees = _unitOfWork.EmployeeRepository.Get(id.Value);
-
-            if (employees is null)
                 return NotFound();
-
-            var mappedEmp = _mapper.Map<Employee, EmployeeViewModel>(employees);
-
-
-            return View(ViewName, mappedEmp);
-        }
-
-        public IActionResult Edit(int? id)
-        {
-
-            return Details(id, "Edit");
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult Edit([FromRoute] int id, EmployeeViewModel employeeVM)
-        {
-            if (id != employeeVM.Id)
-                return BadRequest();
-
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                var employee = _mapper.Map<EmployeeViewModel, Employee>(employeeVM);
-                _unitOfWork.EmployeeRepository.Update(employee);
-                _unitOfWork.Complete();
-                }
-                catch (Exception ex)
-                {
-                    ModelState.AddModelError(string.Empty, ex.Message);
-                }
-                    return RedirectToAction(nameof(Index)); 
             }
-            return View(employeeVM);
-        }
-        public IActionResult Delete(int? id)
-        {
-            return Details(id, "Delete");
+
+            var employeeDto = _mapper.Map<Employee, EmployeeDto>(employee);
+            return Ok(employeeDto);
         }
 
+        // POST: api/employee
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult Delete( EmployeeViewModel employeeVM)
+        public ActionResult<EmployeeDto> CreateEmployee(CreateEmployeeDto createEmployeeDto)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var employee = _mapper.Map<CreateEmployeeDto, Employee>(createEmployeeDto);
+            employee.CreationDate = DateTime.Now;
+            employee.IsDeleted = false;
+
+            _unitOfWork.EmployeeRepository.Add(employee);
+            _unitOfWork.Complete();
+
+            var employeeDto = _mapper.Map<Employee, EmployeeDto>(employee);
+            return CreatedAtAction(nameof(GetEmployee), new { id = employeeDto.Id }, employeeDto);
+        }
+
+        // PUT: api/employee/5
+        [HttpPut("{id}")]
+        public IActionResult UpdateEmployee(int id, UpdateEmployeeDto updateEmployeeDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var existingEmployee = _unitOfWork.EmployeeRepository.Get(id);
+            if (existingEmployee == null)
+            {
+                return NotFound();
+            }
+
+            // Update properties
+            existingEmployee.Name = updateEmployeeDto.Name;
+            existingEmployee.Age = updateEmployeeDto.Age;
+            existingEmployee.Address = updateEmployeeDto.Address;
+            existingEmployee.Salary = updateEmployeeDto.Salary;
+            existingEmployee.IsActive = updateEmployeeDto.IsActive;
+            existingEmployee.Email = updateEmployeeDto.Email;
+            existingEmployee.PhoneNumber = updateEmployeeDto.PhoneNumber;
+            existingEmployee.HiringDate = updateEmployeeDto.HiringDate;
+            existingEmployee.DepartmentId = updateEmployeeDto.DepartmentId;
+
             try
             {
-                var mappedEmp = _mapper.Map<EmployeeViewModel, Employee>(employeeVM);
-
-                _unitOfWork.EmployeeRepository.Delete(mappedEmp);
-                var count = _unitOfWork.Complete();
-                if (count > 0)
-                    DocumentSettings.DeleteFile(employeeVM.ImageName, "images"); 
-                return RedirectToAction(nameof(Index));
+                _unitOfWork.EmployeeRepository.Update(existingEmployee);
+                _unitOfWork.Complete();
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError(string.Empty, ex.Message);
+                return BadRequest(ex.Message);
             }
 
-            return View(employeeVM);
+            return NoContent();
+        }
 
+        // DELETE: api/employee/5
+        [HttpDelete("{id}")]
+        public IActionResult DeleteEmployee(int id)
+        {
+            var employee = _unitOfWork.EmployeeRepository.Get(id);
+            if (employee == null)
+            {
+                return NotFound();
+            }
+
+            try
+            {
+                _unitOfWork.EmployeeRepository.Delete(employee);
+                _unitOfWork.Complete();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
+            return NoContent();
+        }
+
+        // GET: api/employee/department/5
+        [HttpGet("department/{departmentId}")]
+        public ActionResult<IEnumerable<EmployeeDto>> GetEmployeesByDepartment(int departmentId)
+        {
+            var employees = _unitOfWork.EmployeeRepository.GetAll()
+                .Where(e => e.DepartmentId == departmentId && !e.IsDeleted);
+
+            var employeeDtos = _mapper.Map<IEnumerable<Employee>, IEnumerable<EmployeeDto>>(employees);
+            return Ok(employeeDtos);
         }
     }
 }
