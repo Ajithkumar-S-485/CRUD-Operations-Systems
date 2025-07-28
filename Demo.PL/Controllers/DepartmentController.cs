@@ -1,110 +1,122 @@
-﻿using Demo.BLL.Interfaces;
+using AutoMapper;
+using Demo.BLL.Interfaces;
 using Demo.DAL.Models;
+using Demo.PL.ViewModels;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Demo.PL.Controllers
 {
-    public class DepartmentController : Controller
+    [ApiController]
+    [Route("api/[controller]")]
+    public class DepartmentController : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
 
-        //private readonly IDepartmentRepository _departmentRepo;
-
-        public DepartmentController(IUnitOfWork unitOfWork)
+        public DepartmentController(IUnitOfWork unitOfWork, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
-            //_departmentRepo = departmentRepo;
+            _mapper = mapper;
         }
-        public IActionResult Index()
+
+        // GET: api/department
+        [HttpGet]
+        public ActionResult<IEnumerable<DepartmentDto>> GetDepartments()
         {
             var departments = _unitOfWork.DepartmentRepository.GetAll();
-            return View(departments);
-        }
-        public IActionResult Create()
-        {
-            return View();
+            var departmentDtos = _mapper.Map<IEnumerable<Department>, IEnumerable<DepartmentDto>>(departments);
+            return Ok(departmentDtos);
         }
 
-        [HttpPost]
-        public IActionResult Create(Department department)
+        // GET: api/department/5
+        [HttpGet("{id}")]
+        public ActionResult<DepartmentDto> GetDepartment(int id)
         {
-            if (ModelState.IsValid)
+            var department = _unitOfWork.DepartmentRepository.Get(id);
+            if (department == null)
             {
-                _unitOfWork.DepartmentRepository.Add(department);
-                var count = _unitOfWork.Complete();
-                if (count > 0)
-                {
-                    return RedirectToAction(nameof(Index));
-                }
-            }
-            return View(department);
-        }
-
-        [HttpGet]
-        public IActionResult Details(int? id, string ViewName = "Details") //Detailes
-        {
-            if (!id.HasValue)
-                return BadRequest();
-
-            var department = _unitOfWork.DepartmentRepository.Get(id.Value);
-            if (department is null)
                 return NotFound();
-
-            return View(ViewName, department);
-        }
-
-        public IActionResult Edit(int? id)
-        {
-            return Details(id, "Edit");
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult Edit([FromRoute] int id, Department department)
-        {
-            if (id != department.Id)
-                return BadRequest();
-
-
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _unitOfWork.DepartmentRepository.Update(department);
-                    _unitOfWork.Complete();
-                    return RedirectToAction(nameof(Index));
-                }
-                catch (Exception ex)
-                {
-                    ModelState.AddModelError(string.Empty, ex.Message);
-                }
             }
-            return View(department);
-        }
-        public IActionResult Delete(int? id)
-        {
-            return Details(id, "Delete");
+
+            var departmentDto = _mapper.Map<Department, DepartmentDto>(department);
+            return Ok(departmentDto);
         }
 
+        // POST: api/department
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult Delete(Department department)
+        public ActionResult<DepartmentDto> CreateDepartment(CreateDepartmentDto createDepartmentDto)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var department = _mapper.Map<CreateDepartmentDto, Department>(createDepartmentDto);
+            department.DateOfCreation = DateTime.Now;
+
+            _unitOfWork.DepartmentRepository.Add(department);
+            _unitOfWork.Complete();
+
+            var departmentDto = _mapper.Map<Department, DepartmentDto>(department);
+            return CreatedAtAction(nameof(GetDepartment), new { id = departmentDto.Id }, departmentDto);
+        }
+
+        // PUT: api/department/5
+        [HttpPut("{id}")]
+        public IActionResult UpdateDepartment(int id, UpdateDepartmentDto updateDepartmentDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var existingDepartment = _unitOfWork.DepartmentRepository.Get(id);
+            if (existingDepartment == null)
+            {
+                return NotFound();
+            }
+
+            // Update properties
+            existingDepartment.Code = updateDepartmentDto.Code;
+            existingDepartment.Name = updateDepartmentDto.Name;
+
+            try
+            {
+                _unitOfWork.DepartmentRepository.Update(existingDepartment);
+                _unitOfWork.Complete();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
+            return NoContent();
+        }
+
+        // DELETE: api/department/5
+        [HttpDelete("{id}")]
+        public IActionResult DeleteDepartment(int id)
+        {
+            var department = _unitOfWork.DepartmentRepository.Get(id);
+            if (department == null)
+            {
+                return NotFound();
+            }
+
             try
             {
                 _unitOfWork.DepartmentRepository.Delete(department);
                 _unitOfWork.Complete();
-                return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError(string.Empty, ex.Message);
+                return BadRequest(ex.Message);
             }
-            
-            return View(department);
 
+            return NoContent();
         }
     }
 }
