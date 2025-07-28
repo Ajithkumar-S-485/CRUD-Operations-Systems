@@ -1,5 +1,7 @@
 using Demo.BLL.Interfaces;
 using Demo.BLL.Reopsitories;
+using Demo.BLL.Repositories;
+using Demo.DAL.Data;
 using Demo.DAL.Data.Context;
 using Demo.DAL.Models;
 using Demo.PL.Extentions;
@@ -37,6 +39,12 @@ namespace Demo.PL
             {
                 options.UseSqlServer(Configuration.GetConnectionString("DefualtConnection"));
             },ServiceLifetime.Scoped);
+
+            // Add FinAKHRA DbContext
+            services.AddDbContext<FinAkhraDbContext>(options =>
+            {
+                options.UseSqlServer(Configuration.GetConnectionString("FinAkhraConnection"));
+            }, ServiceLifetime.Scoped);
             
             services.AddAplicationServices();
 

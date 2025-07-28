@@ -1,0 +1,256 @@
+@{
+    ViewData["Title"] = "FinAKHRA Dashboard";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <h2 class="mb-4">FinAKHRA Financial Management System</h2>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title">Total Members</h6>
+                            <h3>@ViewBag.TotalMembers</h3>
+                            <small>@ViewBag.ActiveMembers Active</small>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-users fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title">Fees Collected</h6>
+                            <h3>$@ViewBag.TotalFeesCollected</h3>
+                            <small>@ViewBag.PendingFeesCount Pending</small>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-dollar-sign fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title">Cash Balance</h6>
+                            <h3>$@ViewBag.CashBalance</h3>
+                            <small>Current Balance</small>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-wallet fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title">Medicaid Requests</h6>
+                            <h3>@ViewBag.PendingMedicaidRequests</h3>
+                            <small>Pending Approval</small>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-plus-circle fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Monthly Financial Summary -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Monthly Financial Summary</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-6">
+                            <h6>Income</h6>
+                            <h4 class="text-success">$@ViewBag.MonthlyIncome</h4>
+                        </div>
+                        <div class="col-6">
+                            <h6>Expenses</h6>
+                            <h4 class="text-danger">$@ViewBag.MonthlyExpense</h4>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row">
+                        <div class="col-12">
+                            <h6>Net Income</h6>
+                            <h4 class="@(ViewBag.NetIncome >= 0 ? "text-success" : "text-danger")">
+                                $@ViewBag.NetIncome
+                            </h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-2">
+                            <a href="@Url.Action("Create", "Member")" class="btn btn-primary btn-block">
+                                <i class="fas fa-user-plus"></i> Add Member
+                            </a>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <a href="@Url.Action("Create", "Fee")" class="btn btn-success btn-block">
+                                <i class="fas fa-money-bill"></i> Record Fee
+                            </a>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <a href="@Url.Action("Create", "Event")" class="btn btn-info btn-block">
+                                <i class="fas fa-calendar-plus"></i> Add Event
+                            </a>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <a href="@Url.Action("Create", "Medicaid")" class="btn btn-warning btn-block">
+                                <i class="fas fa-plus-circle"></i> Medicaid Request
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation Cards -->
+    <div class="row">
+        <div class="col-md-3 mb-3">
+            <div class="card h-100">
+                <div class="card-header bg-primary text-white">
+                    <h6><i class="fas fa-users"></i> Member Management</h6>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        <li><a href="@Url.Action("Index", "Member")" class="text-decoration-none">View All Members</a></li>
+                        <li><a href="@Url.Action("Create", "Member")" class="text-decoration-none">Add New Member</a></li>
+                        <li><a href="@Url.Action("Index", "Member", new { searchTerm = "" })" class="text-decoration-none">Search Members</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card h-100">
+                <div class="card-header bg-success text-white">
+                    <h6><i class="fas fa-dollar-sign"></i> Fee Management</h6>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        <li><a href="@Url.Action("Index", "Fee")" class="text-decoration-none">View All Fees</a></li>
+                        <li><a href="@Url.Action("Pending", "Fee")" class="text-decoration-none">Pending Payments</a></li>
+                        <li><a href="@Url.Action("Reports", "Fee")" class="text-decoration-none">Fee Reports</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card h-100">
+                <div class="card-header bg-info text-white">
+                    <h6><i class="fas fa-calendar"></i> Event Management</h6>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        <li><a href="@Url.Action("Index", "Event")" class="text-decoration-none">All Events</a></li>
+                        <li><a href="@Url.Action("Index", "Event", new { filter = "upcoming" })" class="text-decoration-none">Upcoming Events</a></li>
+                        <li><a href="@Url.Action("Budget", "Event")" class="text-decoration-none">Budget Overview</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card h-100">
+                <div class="card-header bg-warning text-white">
+                    <h6><i class="fas fa-plus-circle"></i> Medicaid</h6>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        <li><a href="@Url.Action("Index", "Medicaid")" class="text-decoration-none">All Requests</a></li>
+                        <li><a href="@Url.Action("Pending", "Medicaid")" class="text-decoration-none">Pending Approval</a></li>
+                        <li><a href="@Url.Action("Reports", "Medicaid")" class="text-decoration-none">Medicaid Reports</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Accounting Section -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-dark text-white">
+                    <h5><i class="fas fa-chart-line"></i> Accounting & Reports</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <a href="@Url.Action("JournalEntries", "Accounting")" class="btn btn-outline-primary btn-block mb-2">
+                                Journal Entries
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="@Url.Action("CashBook", "Accounting")" class="btn btn-outline-success btn-block mb-2">
+                                Cash Book
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="@Url.Action("TrialBalance", "Accounting")" class="btn btn-outline-info btn-block mb-2">
+                                Trial Balance
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="@Url.Action("IncomeStatement", "Accounting")" class="btn btn-outline-warning btn-block mb-2">
+                                Income Statement
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Auto-refresh statistics every 30 seconds
+        setInterval(function() {
+            $.get('@Url.Action("QuickStats", "Dashboard")', function(data) {
+                // Update statistics if needed
+                console.log('Stats updated:', data);
+            });
+        }, 30000);
+    </script>
+}
