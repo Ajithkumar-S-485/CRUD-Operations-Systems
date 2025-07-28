@@ -1,0 +1,89 @@
+### Employee Management API Test Requests
+
+# Get all departments
+GET https://localhost:5001/api/departments
+
+###
+
+# Get department by ID
+GET https://localhost:5001/api/departments/1
+
+###
+
+# Get department by code
+GET https://localhost:5001/api/departments/by-code/IT
+
+###
+
+# Create a new department
+POST https://localhost:5001/api/departments
+Content-Type: application/json
+
+{
+  "code": "ENG",
+  "name": "Engineering"
+}
+
+###
+
+# Get all employees
+GET https://localhost:5001/api/employees
+
+###
+
+# Get employee by ID
+GET https://localhost:5001/api/employees/1
+
+###
+
+# Get active employees only
+GET https://localhost:5001/api/employees/active
+
+###
+
+# Get employees by department
+GET https://localhost:5001/api/employees/department/1
+
+###
+
+# Create a new employee
+POST https://localhost:5001/api/employees
+Content-Type: application/json
+
+{
+  "name": "Alice Johnson",
+  "age": 28,
+  "address": "789 Tech Street, Silicon Valley, CA",
+  "salary": 85000,
+  "isActive": true,
+  "email": "alice.johnson@company.com",
+  "phoneNumber": "555-0199",
+  "departmentId": 1
+}
+
+###
+
+# Update an employee
+PUT https://localhost:5001/api/employees/1
+Content-Type: application/json
+
+{
+  "name": "John Doe Updated",
+  "age": 31,
+  "address": "123 Updated Main St, New York, NY",
+  "salary": 78000,
+  "isActive": true,
+  "email": "john.doe.updated@company.com",
+  "phoneNumber": "555-0123",
+  "departmentId": 1
+}
+
+###
+
+# Get department employees
+GET https://localhost:5001/api/departments/1/employees
+
+###
+
+# Soft delete an employee
+DELETE https://localhost:5001/api/employees/2
