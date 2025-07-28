@@ -32,15 +32,32 @@ namespace Demo.PL
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            // Add API Controllers
+            services.AddControllers();
+            
+            // Add MVC for backward compatibility (optional)
             services.AddControllersWithViews();
+            
             services.AddDbContext<AppDbContext>(options =>
             {
-                options.UseSqlServer(Configuration.GetConnectionString("DefualtConnection"));
-            },ServiceLifetime.Scoped);
+                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
+            }, ServiceLifetime.Scoped);
             
             services.AddAplicationServices();
 
             services.AddAutoMapper(M => M.AddProfile(new MappingProfiles()));
+
+            // Add CORS for API
+            services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAll",
+                    builder =>
+                    {
+                        builder.AllowAnyOrigin()
+                               .AllowAnyMethod()
+                               .AllowAnyHeader();
+                    });
+            });
 
             services.AddIdentity<ApplicationUser, IdentityRole>(config =>
             {
@@ -61,8 +78,6 @@ namespace Demo.PL
                 config.LoginPath = "/Account/SignIn";
                 config.ExpireTimeSpan = TimeSpan.FromMinutes(10);
             });
-
-            
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -78,16 +93,23 @@ namespace Demo.PL
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
+            
             app.UseHttpsRedirection();
             app.UseStaticFiles();
+
+            // Enable CORS
+            app.UseCors("AllowAll");
 
             app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();
-           
 
             app.UseEndpoints(endpoints =>
             {
+                // API routes
+                endpoints.MapControllers();
+                
+                // MVC routes (for backward compatibility)
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");

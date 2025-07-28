@@ -1,4 +1,4 @@
-﻿using Demo.DAL.Models;
+using Demo.DAL.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -18,7 +18,8 @@ namespace Demo.DAL.Data.Context
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer("Server = .; Database = MVCApplication; Trusted_Connection = True");
+            // Connection string is now configured in Startup.cs
+            // This method is kept for potential future use
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
